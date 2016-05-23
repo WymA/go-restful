@@ -1,83 +1,80 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
+	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
-// Movie Struct
-type Movie struct {
-	Title  string `json:"title"`
-	Rating string `json:"rating"`
-	Year   string `json:"year"`
-}
-
-var movies = map[string]*Movie{
-	"tt0076759": &Movie{Title: "Star Wars: A New Hope", Rating: "8.7", Year: "1977"},
-	"tt0082971": &Movie{Title: "Indiana Jones: Raiders of the Lost Ark", Rating: "8.6", Year: "1981"},
+// User struct
+type User struct {
+	ID        int64  `db:"id" json:"id"`
+	Firstname string `db:"firstname" json:"firstname"`
+	Lastname  string `db:"lastname" json:"lastname"`
 }
 
 func main() {
-	router := mux.NewRouter()
-	router.HandleFunc("/movies", handleMovies).Methods("GET")
-	router.HandleFunc("/movie/{imdbKey}", handleMovie).Methods("GET", "DELETE", "POST")
-	http.ListenAndServe(":8080", router)
+
+	router := gin.Default()
+
+	v1 := router.Group("api/v1")
+	{
+		v1.GET("/users", GetUsers)
+		v1.GET("/users/:id", GetUser)
+		v1.POST("/users", PostUser)
+		v1.PUT("/users/:id", UpdateUser)
+		v1.DELETE("/users/:id", DeleteUser)
+	}
+
+	router.Run(":8080")
 }
 
-func handleMovie(res http.ResponseWriter, req *http.Request) {
-	res.Header().Set("Content-Type", "application/json")
-	vars := mux.Vars(req)
-	imdbKey := vars["imdbKey"]
+// GetUsers func
+func GetUsers(c *gin.Context) {
 
-	switch req.Method {
-	case "GET":
-		movie, ok := movies[imdbKey]
-		if !ok {
-			res.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(res, string("Movie not found"))
-		}
-		outgoingJSON, error := json.Marshal(movie)
-		if error != nil {
-			log.Println(error.Error())
-			http.Error(res, error.Error(), http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(res, string(outgoingJSON))
-	case "DELETE":
-		delete(movies, imdbKey)
-		res.WriteHeader(http.StatusNoContent)
-	case "POST":
-		movie := new(Movie)
-		decoder := json.NewDecoder(req.Body)
-		error := decoder.Decode(&movie)
-		if error != nil {
-			log.Println(error.Error())
-			http.Error(res, error.Error(), http.StatusInternalServerError)
-			return
-		}
-		movies[imdbKey] = movie
-		outgoingJSON, err := json.Marshal(movie)
-		if err != nil {
-			log.Println(error.Error())
-			http.Error(res, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		res.WriteHeader(http.StatusCreated)
-		fmt.Fprint(res, string(outgoingJSON))
+	type Users []User
+	var users = Users{
+		User{ID: 1, Firstname: "Oliver", Lastname: "Queen"},
+		User{ID: 2, Firstname: "Malcom", Lastname: "Merlyn"},
 	}
+	c.JSON(200, users)
+	// curl -i http://localhost:8080/api/v1/users
 }
 
-func handleMovies(res http.ResponseWriter, req *http.Request) {
-	res.Header().Set("Content-Type", "application/json")
-	outgoingJSON, error := json.Marshal(movies)
-	if error != nil {
-		log.Println(error.Error())
-		http.Error(res, error.Error(), http.StatusInternalServerError)
-		return
+// GetUser func
+func GetUser(c *gin.Context) {
+
+	id := c.Params.ByName("id")
+	userID, _ := strconv.ParseInt(id, 0, 64)
+
+	if userID == 1 {
+
+		content := gin.H{"id": userID, "firstname": "Oliver", "lastname": "Queen"}
+		c.JSON(200, content)
+	} else if userID == 2 {
+
+		content := gin.H{"id": userID, "firstname": "Malcom", "lastname": "Merlyn"}
+		c.JSON(200, content)
+	} else {
+
+		content := gin.H{"error": "user with id#" + id + " not found"}
+		c.JSON(404, content)
 	}
-	fmt.Fprint(res, string(outgoingJSON))
+
+	// curl -i http://localhost:8080/api/v1/users/1
+}
+
+// PostUser func
+func PostUser(c *gin.Context) {
+	// The futur code…
+}
+
+// UpdateUser func
+func UpdateUser(c *gin.Context) {
+	// The futur code…
+}
+
+// DeleteUser func
+func DeleteUser(c *gin.Context) {
+	// The futur code…
 }
