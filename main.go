@@ -34,10 +34,11 @@ func main() {
 		v1.GET("/users/:id", models.GetUser)
 		v1.POST("/users", models.PostUser)
 		v1.PUT("/users/:id", models.UpdateUser)
-		v1.DELETE("/users/:id", models.DeleteUser)
+		//v1.DELETE("/users/:id", models.DeleteUser)
 		// v1.OPTIONS("/users", models.OptionsUser)     // POST
 		// v1.OPTIONS("/users/:id", models.OptionsUser) // PUT, DELETE
 	}
 
+	// run the server at port 8080
 	router.Run(":8080")
 }
