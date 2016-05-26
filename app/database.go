@@ -23,7 +23,7 @@ func checkErr(err error, msg string) {
 // InitDB func
 func InitDB() {
 
-	dbConn, err := sql.Open("mysql", "root:Con@/myapp")
+	dbConn, err := sql.Open("mysql", "wyma:1234@tcp(0.0.0.0)/myapp")
 	checkErr(err, "sql.Open failed")
 
 	dialect := gorp.MySQLDialect{"InnoDB", "UTF8"}
