@@ -1,20 +1,34 @@
 version: '2'
 services:
-    web:
-      build: .
-      depends_on:
-        - db
-      links:
-        - db
-      ports:
-        - "3000:3000"
-        
-    db:
-      image: mysql:5.7
-      ports:
-        - "3306:3306"
-      environment:
-        MYSQL_ROOT_PASSWORD: 1234
-        MYSQL_DATABASE: myapp
-        MYSQL_USER: wyma
-        MYSQL_PASSWORD: 1234
+  web:
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
+    # ports from container exposed to the docker machine and the guest machine
+    ports:
+      # 80 on the host, 8080 on the guest. Websever listens on 8080
+      - "8080:8080" # http
+    # file with environment declarations for the container
+    # env_file:
+    #   - docker/web/.env
+    depends_on:
+      - db
+    # Link to containers in another service
+    links:
+      - db
+    volumes:
+     - ../../../../.:/go
+
+  db:
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_USER: wyma
+      MYSQL_PASSWORD: 1234
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: myapp
+    # sync folders. MySQL data is stored outside container so that rebuilding doesn't clear db.
+    # folder is at workspace root.
