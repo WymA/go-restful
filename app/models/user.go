@@ -3,10 +3,10 @@ package models
 import (
 	"log"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
+	"time"
 
 	"github.com/WymA/go-restful/app"
+	"github.com/gin-gonic/gin"
 )
 
 // User struct
@@ -70,8 +70,9 @@ func PostUser(c *gin.Context) {
 	if user.Firstname != "" && user.Lastname != "" {
 
 		if insert, _ :=
-			app.GetDB().Exec(`INSERT INTO user (firstname, lastname) VALUES (?, ?)`,
-				user.Firstname, user.Lastname); insert != nil {
+			app.GetDB().Exec(`INSERT INTO user (firstname, lastname, createAt, updateAt)
+			VALUES (?, ?, ?, ?)`,
+				user.Firstname, user.Lastname, time.Now(), time.Now()); insert != nil {
 
 			userID, err := insert.LastInsertId()
 			if err == nil {

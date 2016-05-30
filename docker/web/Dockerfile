@@ -22,7 +22,7 @@ COPY . /go/src/github.com/WymA/go-restful
 # ENV PORT 8080
 
 # Expose port 3000 to the host so we can access the gin proxy
-EXPOSE 8080
+EXPOSE 3000
 
 # Now tell Docker what command to run when the container starts
 CMD go run main.go
